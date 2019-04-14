@@ -89,7 +89,7 @@
                 key: 'lực_lượng_vũ_trang',
                 name: 'Lực lượng vũ trang'
             }].forEach(function (khoi) {
-                var x = $(`<button onclick="selectKhoi(${khoi})">${escapeHtml(khoi.name)}</button>`)
+                var x = $(`<button onclick="selectKhoi(khoi)">${escapeHtml(khoi.name)}</button>`)
                 $('#list').append(x)
             })
         }

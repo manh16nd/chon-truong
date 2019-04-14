@@ -1,111 +1,190 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://nuichatbot-1.herokuapp.com/pagetuyensinh/list-group.js"></script>
-        <script>var BACKEND = 'https://nuichatbot-1.herokuapp.com';</script>
-    </head>
-    <body>
-        <div id="list">
-            <center>Loading...</center>
-        </div>
-        <div id="warn-in-chat" style="display: none">
-            <center>
-                Bạn đang được kết nối với 1 tư vấn viên. Bạn có chắc chắn muốn kết thúc cuộc trò chuyện này?<br/><br/>
-                Lưu ý: Nếu bạn ngắt kết nối, tư vấn viên này sẽ không thể trả lời bạn nữa<br/><br/>
-                <button onclick="resetState()">Ngắt kết nối</button>
-            </center>
-        </div>
-        <script>
-            $('#warn-in-chat').hide();
 
-            (function(d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) {return;}
-                js = d.createElement(s); js.id = id;
-                js.src = "//connect.facebook.net/en_US/messenger.Extensions.js";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'Messenger'));
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="majors.js"></script>
+    <script src="https://nuichatbot.herokuapp.com/pagetuyensinh/list-group.js"></script>
+    <script>var BACKEND = 'https://nuichatbot.herokuapp.com';</script>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,600,400italic,700&amp;subset=latin-ext,vietnamese' rel='stylesheet' type='text/css'>
+    <style>
+        body {
+            font-family: 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-            var threadContext = {};
+        #credit {
+            font-family: monospace;
+            color: #8f8f8f;
+        }
 
-            window.extAsyncInit = function() {
-                MessengerExtensions.getContext(APP_ID,
+        button {
+            cursor: pointer;
+            font-size: 1rem;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: .5rem .75rem;
+            width: 100%;
+            margin-bottom: 4px;
+            margin-right: 4px;
+        }
+
+        button:hover {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12),
+                0 2px 4px 0 rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="list">
+        <br/><br/>
+        <center>
+            <h1>Xin chờ...</h1>
+            <img src="loading.gif" />
+        </center>
+    </div>
+    <div id="school">
+
+    </div>
+    <div id="warn-in-chat" style="display: none">
+        <center>
+            <br/><h2>Thông báo:</h2><br/>
+            Bạn đang được kết nối với 1 tư vấn viên. Bạn có chắc chắn muốn kết thúc cuộc trò chuyện này?<br /><br />
+            Lưu ý: Nếu bạn ngắt kết nối, tư vấn viên này sẽ không thể trả lời bạn nữa<br /><br />
+            <button onclick="resetState()" style="background-color: #ffccbc">Ngắt kết nối</button>
+        </center>
+    </div>
+
+    <br/><br/><center><div id="credit">Dev by nui & mnd</div></center>
+    <script>
+        $('#warn-in-chat').hide();
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) { return; }
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/messenger.Extensions.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'Messenger'));
+
+        var threadContext = {};
+        var selected = '';
+
+        window.extAsyncInit = function () {
+            MessengerExtensions.getContext(APP_ID,
                 function success(thread_context) {
                     console.log(thread_context);
                     threadContext = thread_context;
                     checkIsInChat();
                 }, function error(err) {
                 });
-            }
+        }
 
-            function checkIsInChat() {
-                $.get(BACKEND + '/pagetuyensinh/getConversationInfo?signed_request=' + encodeURIComponent(threadContext.signed_request))
+        function checkIsInChat() {
+            $.get(BACKEND + '/pagetuyensinh/getConversationInfo?signed_request=' + encodeURIComponent(threadContext.signed_request))
                 .done(res => {
                     if (typeof res == 'string') res = JSON.parse(res)
                     console.log(res)
-                    $('#list').html('');
+                    $('#list').html('<p>Danh sách các khối trường:</p>');
                     if (res.status > 0) {
                         $('#warn-in-chat').show();
                     } else {
+                        if (!selected) return showGroups();
                         showGroupList();
                     }
                 })
-            }
+        }
 
-            function resetState() {
-                $.post(BACKEND + '/pagetuyensinh/saveConversationInfo', {
-                    signed_request: threadContext.signed_request,
-                    disconnect: true
-                }).done(() => {
-                    MessengerExtensions.requestCloseBrowser(
-                        function success() {},
-                        function error(err) {}
-                    );
-                });
-            }
+        function resetState() {
+            $.post(BACKEND + '/pagetuyensinh/saveConversationInfo', {
+                signed_request: threadContext.signed_request,
+                disconnect: true
+            }).done(() => {
+                MessengerExtensions.requestCloseBrowser(
+                    function success() { },
+                    function error(err) { }
+                );
+            });
+        }
 
-            function showGroupList() {
-                $('#list').html('');
-                GROUPS.forEach(function(group, i) {
+        function showGroups() {
+            [{
+                key: 'tự_nhiên',
+                name: 'Tự nhiên',
+            }, {
+                key: 'xã_hội',
+                name: 'Xã hội',
+            }, {
+                key: 'cao_đẳng_nghề',
+                name: 'Cao đẳng nghề',
+            }, {
+                key: 'lực_lượng_vũ_trang',
+                name: 'Lực lượng vũ trang'
+            }].forEach(function (khoi, i) {
+                var group = $(`<button onclick="selectKhoi(${i})">${escapeHtml(khoi.name)}</button>`)
+                $('#list').append(group)
+            })
+        }
+
+        function selectKhoi(i) {
+            console.log(i)
+            const khoi = majors[i]
+            const k = khoi.key
+            $('#school').html('<br/><p>Chọn 1 trường bạn muốn được tư vấn:</p>')
+            GROUPS.forEach(function (group, i) {
+                console.log(group)
+                if (group.khoi[k]) {
                     var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
-                    $('#list').append(entry);
-                });
-            }
+                    $('#school').append(entry);
+                }
+            });
+        }
 
-            function selectGroup(i) {
-                var group = GROUPS[i];
-                $('#list').html('<center>Xin chờ...</center>');
-                $.ajax({
-                    url: BACKEND + '/pagetuyensinh/saveConversationInfo',
-                    type: 'post',
-                    dataType: 'json',
-                    contentType: 'application/json', 
-                    data: JSON.stringify({
-                        signed_request: threadContext.signed_request,
-                        data: {
-                            psid: threadContext.psid,
-                            group: group.code,
-                            status: 1
-                        }
-                    })
-                }).done(() => {
-                    MessengerExtensions.requestCloseBrowser(
-                        function success() {},
-                        function error(err) {}
-                    );
+        function showGroupList() {
+            $('#list').html('');
+            GROUPS.forEach(function (group, i) {
+                var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
+                $('#list').append(entry);
+            });
+        }
+
+        function selectGroup(i) {
+            var group = GROUPS[i];
+            $('#list').html('<center>Xin chờ...</center>');
+            $.ajax({
+                url: BACKEND + '/pagetuyensinh/saveConversationInfo',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    signed_request: threadContext.signed_request,
+                    data: {
+                        psid: threadContext.psid,
+                        group: group.code,
+                        status: 1
+                    }
                 })
-            }
+            }).done(() => {
+                MessengerExtensions.requestCloseBrowser(
+                    function success() { },
+                    function error(err) { }
+                );
+            })
+        }
 
-            function escapeHtml(unsafe) {
-                return unsafe
+        function escapeHtml(unsafe) {
+            return unsafe
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
-            }
-        </script>
-    </body>
+        }
+    </script>
+</body>
+
 </html>

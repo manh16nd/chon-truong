@@ -7,25 +7,15 @@
     <script src="https://nuichatbot-1.herokuapp.com/pagetuyensinh/list-group.js"></script>
     <script>var BACKEND = 'https://nuichatbot-1.herokuapp.com';</script>
     <style>
-        #list {
-            width: 100%;
-            display: flex;
-        }
-
-        #list button {
-            width: 100%;
-            padding: 1rem .5rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            outline: none;
-        }
     </style>
 </head>
 
 <body>
     <div id="list">
         <center>Loading...</center>
+    </div>
+    <div id="schools">
+
     </div>
     <div id="warn-in-chat" style="display: none">
         <center>
@@ -46,6 +36,7 @@
         }(document, 'script', 'Messenger'));
 
         var threadContext = {};
+        var selected = '';
 
         window.extAsyncInit = function () {
             MessengerExtensions.getContext(APP_ID,
@@ -66,6 +57,7 @@
                     if (res.status > 0) {
                         $('#warn-in-chat').show();
                     } else {
+                        if (!selected) return showGroups();
                         showGroupList();
                     }
                 })
@@ -80,6 +72,35 @@
                     function success() { },
                     function error(err) { }
                 );
+            });
+        }
+
+        function showGroups() {
+            [{
+                key: 'tự_nhiên',
+                name: 'Tự nhiên',
+            }, {
+                key: 'xã_hội',
+                name: 'Xã hội',
+            }, {
+                key: 'cao_đẳng_nghề',
+                name: 'Cao đẳng nghề',
+            }, {
+                key: 'lực_lượng_vũ_trang',
+                name: 'Lực lượng vũ trang'
+            }].forEach(function (khoi) {
+                var khoi = $(`<button onclick="selectKhoi(${khoi.key})">${escapeHtml(khoi.name)}</button>`)
+                $('#list').append(khoi)
+            })
+        }
+
+        function selectKhoi(khoi) {
+            $('#school').html('')
+            GROUPS.forEach(function (group, i) {
+                if (group.khoi[khoi]) {
+                    var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
+                    $('#school').append(entry);
+                }
             });
         }
 

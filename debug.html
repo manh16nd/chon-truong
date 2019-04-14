@@ -6,6 +6,19 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://nuichatbot-1.herokuapp.com/pagetuyensinh/list-group.js"></script>
     <script>var BACKEND = 'https://nuichatbot-1.herokuapp.com';</script>
+    <script>var majors = [{
+            key: 'tự_nhiên',
+            name: 'Tự nhiên',
+        }, {
+            key: 'xã_hội',
+            name: 'Xã hội',
+        }, {
+            key: 'cao_đẳng_nghề',
+            name: 'Cao đẳng nghề',
+        }, {
+            key: 'lực_lượng_vũ_trang',
+            name: 'Lực lượng vũ trang'
+        }]</script>
     <style>
     </style>
 </head>
@@ -88,14 +101,15 @@
             }, {
                 key: 'lực_lượng_vũ_trang',
                 name: 'Lực lượng vũ trang'
-            }].forEach(function (khoi) {
-                var x = $(`<button onclick="selectKhoi(khoi)">${escapeHtml(khoi.name)}</button>`)
-                $('#list').append(x)
+            }].forEach(function (khoi, i) {
+                var group = $(`<button onclick="selectKhoi(${i})">${escapeHtml(khoi.name)}</button>`)
+                $('#list').append(group)
             })
         }
 
-        function selectKhoi(khoi) {
-            console.log(khoi)
+        function selectKhoi(i) {
+            console.log(i)
+            const khoi = majros[i]
             const k = khoi.key
             $('#school').html('')
             GROUPS.forEach(function (group, i) {

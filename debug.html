@@ -97,6 +97,7 @@
         function selectKhoi(khoi) {
             $('#school').html('')
             GROUPS.forEach(function (group, i) {
+                console.log(group)
                 if (group.khoi[khoi]) {
                     var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
                     $('#school').append(entry);

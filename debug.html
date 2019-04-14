@@ -71,7 +71,7 @@
                 .done(res => {
                     if (typeof res == 'string') res = JSON.parse(res)
                     console.log(res)
-                    $('#list').html('');
+                    $('#list').html('<p>Danh sách các khối trường:</p>');
                     if (res.status > 0) {
                         $('#warn-in-chat').show();
                     } else {
@@ -127,7 +127,7 @@
         }
 
         function showGroupList() {
-            $('#list').html('Chọn 1 trường bạn muốn được tư vấn:');
+            $('#list').html('<p>Chọn 1 trường bạn muốn được tư vấn:</p>');
             GROUPS.forEach(function (group, i) {
                 var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
                 $('#list').append(entry);

@@ -1,47 +1,63 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://nuichatbot-1.herokuapp.com/pagetuyensinh/list-group.js"></script>
-        <script>var BACKEND = 'https://nuichatbot-1.herokuapp.com';</script>
-    </head>
-    <body>
-        <div id="list">
-            <center>Loading...</center>
-        </div>
-        <div id="warn-in-chat" style="display: none">
-            <center>
-                Bạn đang được kết nối với 1 tư vấn viên. Bạn có chắc chắn muốn kết thúc cuộc trò chuyện này?<br/><br/>
-                Lưu ý: Nếu bạn ngắt kết nối, tư vấn viên này sẽ không thể trả lời bạn nữa<br/><br/>
-                <button onclick="resetState()">Ngắt kết nối</button>
-            </center>
-        </div>
-        <script>
-            $('#warn-in-chat').hide();
 
-            (function(d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) {return;}
-                js = d.createElement(s); js.id = id;
-                js.src = "//connect.facebook.net/en_US/messenger.Extensions.js";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'Messenger'));
+<head>
+    <meta charset="utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://nuichatbot-1.herokuapp.com/pagetuyensinh/list-group.js"></script>
+    <script>var BACKEND = 'https://nuichatbot-1.herokuapp.com';</script>
+    <style>
+        #list {
+            display: flex;
+        }
 
-            var threadContext = {};
+        #list button {
+            width: 100%;
+            padding: 1rem .5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            outline: none;
+        }
+    </style>
+</head>
 
-            window.extAsyncInit = function() {
-                MessengerExtensions.getContext(APP_ID,
+<body>
+    <div id="list">
+        <center>Loading...</center>
+    </div>
+    <div id="warn-in-chat" style="display: none">
+        <center>
+            Bạn đang được kết nối với 1 tư vấn viên. Bạn có chắc chắn muốn kết thúc cuộc trò chuyện này?<br /><br />
+            Lưu ý: Nếu bạn ngắt kết nối, tư vấn viên này sẽ không thể trả lời bạn nữa<br /><br />
+            <button onclick="resetState()">Ngắt kết nối</button>
+        </center>
+    </div>
+    <script>
+        $('#warn-in-chat').hide();
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) { return; }
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/messenger.Extensions.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'Messenger'));
+
+        var threadContext = {};
+
+        window.extAsyncInit = function () {
+            MessengerExtensions.getContext(APP_ID,
                 function success(thread_context) {
                     console.log(thread_context);
                     threadContext = thread_context;
                     checkIsInChat();
                 }, function error(err) {
                 });
-            }
+        }
 
-            function checkIsInChat() {
-                $.get(BACKEND + '/pagetuyensinh/getConversationInfo?signed_request=' + encodeURIComponent(threadContext.signed_request))
+        function checkIsInChat() {
+            $.get(BACKEND + '/pagetuyensinh/getConversationInfo?signed_request=' + encodeURIComponent(threadContext.signed_request))
                 .done(res => {
                     if (typeof res == 'string') res = JSON.parse(res)
                     console.log(res)
@@ -52,60 +68,61 @@
                         showGroupList();
                     }
                 })
-            }
+        }
 
-            function resetState() {
-                $.post(BACKEND + '/pagetuyensinh/saveConversationInfo', {
+        function resetState() {
+            $.post(BACKEND + '/pagetuyensinh/saveConversationInfo', {
+                signed_request: threadContext.signed_request,
+                disconnect: true
+            }).done(() => {
+                MessengerExtensions.requestCloseBrowser(
+                    function success() { },
+                    function error(err) { }
+                );
+            });
+        }
+
+        function showGroupList() {
+            $('#list').html('');
+            GROUPS.forEach(function (group, i) {
+                var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
+                $('#list').append(entry);
+            });
+        }
+
+        function selectGroup(i) {
+            var group = GROUPS[i];
+            $('#list').html('<center>Xin chờ...</center>');
+            $.ajax({
+                url: BACKEND + '/pagetuyensinh/saveConversationInfo',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({
                     signed_request: threadContext.signed_request,
-                    disconnect: true
-                }).done(() => {
-                    MessengerExtensions.requestCloseBrowser(
-                        function success() {},
-                        function error(err) {}
-                    );
-                });
-            }
-
-            function showGroupList() {
-                $('#list').html('');
-                GROUPS.forEach(function(group, i) {
-                    var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
-                    $('#list').append(entry);
-                });
-            }
-
-            function selectGroup(i) {
-                var group = GROUPS[i];
-                $('#list').html('<center>Xin chờ...</center>');
-                $.ajax({
-                    url: BACKEND + '/pagetuyensinh/saveConversationInfo',
-                    type: 'post',
-                    dataType: 'json',
-                    contentType: 'application/json', 
-                    data: JSON.stringify({
-                        signed_request: threadContext.signed_request,
-                        data: {
-                            psid: threadContext.psid,
-                            group: group.code,
-                            status: 1
-                        }
-                    })
-                }).done(() => {
-                    MessengerExtensions.requestCloseBrowser(
-                        function success() {},
-                        function error(err) {}
-                    );
+                    data: {
+                        psid: threadContext.psid,
+                        group: group.code,
+                        status: 1
+                    }
                 })
-            }
+            }).done(() => {
+                MessengerExtensions.requestCloseBrowser(
+                    function success() { },
+                    function error(err) { }
+                );
+            })
+        }
 
-            function escapeHtml(unsafe) {
-                return unsafe
+        function escapeHtml(unsafe) {
+            return unsafe
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
-            }
-        </script>
-    </body>
+        }
+    </script>
+</body>
+
 </html>

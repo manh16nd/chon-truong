@@ -84,7 +84,7 @@
         }
 
         function showGroupList() {
-            $('#list').html('');
+            $('#list').html('Chọn 1 trường bạn muốn được tư vấn:');
             GROUPS.forEach(function (group, i) {
                 var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
                 $('#list').append(entry);

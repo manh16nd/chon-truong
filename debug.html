@@ -24,6 +24,10 @@
             position: absolute;
             bottom: 0;
         }
+
+        button {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -116,7 +120,7 @@
             console.log(i)
             const khoi = majors[i]
             const k = khoi.key
-            $('#school').html('')
+            $('#school').html('<p>Chọn 1 trường bạn muốn được tư vấn:</p>')
             GROUPS.forEach(function (group, i) {
                 console.log(group)
                 if (group.khoi[k]) {
@@ -127,7 +131,7 @@
         }
 
         function showGroupList() {
-            $('#list').html('<p>Chọn 1 trường bạn muốn được tư vấn:</p>');
+            $('#list').html('');
             GROUPS.forEach(function (group, i) {
                 var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
                 $('#list').append(entry);

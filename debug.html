@@ -96,10 +96,11 @@
 
         function selectKhoi(khoi) {
             console.log(khoi)
+            const k = khoi.key
             $('#school').html('')
             GROUPS.forEach(function (group, i) {
                 console.log(group)
-                if (group.khoi[khoi]) {
+                if (group.khoi[k]) {
                     var entry = $(`<button onclick="selectGroup(${i})">${escapeHtml(group.name)}</button>`);
                     $('#school').append(entry);
                 }
